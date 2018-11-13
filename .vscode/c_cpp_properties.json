@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/mingfei/Documents/RobotManipulationProject/devel/include",
+                "/opt/ros/kinetic/include",
+                "/home/mingfei/Documents/RobotManipulationProject/src/gazebo_ros_pkgs/gazebo_plugins/include",
+                "/home/mingfei/Documents/RobotManipulationProject/src/gazebo_ros_pkgs/gazebo_ros/include",
+                "/home/mingfei/Documents/RobotManipulationProject/src/gazebo_ros_pkgs/gazebo_ros_control/include",
+                "/home/mingfei/Documents/RobotManipulationProject/src/universal_robot/ur_kinematics/include",
+                "/usr/include"
+            ],
+            "name": "Linux",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
