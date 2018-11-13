@@ -6,4 +6,4 @@
 ``` bash
 sudo apt-get install ros-kinetic-rosbridge-server
 ```
-3. Download [*file_server*](https://github.com/mingfeisun/ros-sharp/tree/master/ROS/file_server) and [*gazebo_simulation_scene*](https://github.com/mingfeisun/ros-sharp/tree/master/ROS/gazebo_simulation_scene) pkg to src/ folder, and *catkin_make*
+3. Download [*file_server*](https://github.com/mingfeisun/ros-sharp/tree/master/ROS/file_server), [*gazebo_simulation_scene*](https://github.com/mingfeisun/ros-sharp/tree/master/ROS/gazebo_simulation_scene) and [*unity_simulation_scene*](https://github.com/mingfeisun/ros-sharp/tree/master/ROS/unity_simulation_scene) pkg to src/ folder, and *catkin_make*
