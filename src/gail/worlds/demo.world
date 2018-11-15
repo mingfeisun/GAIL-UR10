@@ -1,0 +1,212 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="demo">
+    <gui> 
+        <camera name="camera">
+            <pose>2.62 1.91 1.35 0 0.34 -2.50</pose>
+            <!--
+              <pose>0.00 0.00 2.6 0 1.57 -3.14</pose> // top view
+             -->
+        </camera>
+    </gui>
+
+    <physics type="ode">
+      <real_time_update_rate>3000</real_time_update_rate>
+    </physics>
+
+    <model name='RoboCup 14 SPL Field'>
+        <static>1</static>
+        <link name='field'>
+            <pose>0 0 0.001 0 -0 0</pose>
+            <collision name='collision'>
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    <size>10.4 7.4</size>
+                    </plane>
+                </geometry>
+                <surface>
+                    <friction>
+                    <ode>
+                        <mu>100</mu>
+                        <mu2>50</mu2>
+                    </ode>
+                    </friction>
+                    <bounce/>
+                    <contact>
+                    <ode/>
+                    </contact>
+                </surface>
+                <max_contacts>10</max_contacts>
+            </collision>
+            <visual name='carpet'>
+                <cast_shadows>0</cast_shadows>
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    <size>10.4 7.4</size>
+                    </plane>
+                </geometry>
+                <material>
+                    <script>
+                    <uri>model://robocup09_spl_field/materials/scripts/</uri>
+                    <uri>model://robocup09_spl_field/materials/textures/</uri>
+                    <name>RoboCup/Carpet</name>
+                    </script>
+                </material>
+            </visual>
+            <visual name='sideline_1'>
+                <pose>0 3 0.011 0 -0 0</pose>
+                <cast_shadows>0</cast_shadows>
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    <size>9.05 0.05</size>
+                    </plane>
+                </geometry>
+                <material>
+                    <script>
+                    <uri>file://media/materials/scripts/gazebo.material</uri>
+                    <name>Gazebo/White</name>
+                    </script>
+                </material>
+            </visual>
+            <visual name='sideline_2'>
+                <pose>0 -3 0.011 0 -0 0</pose>
+                <cast_shadows>0</cast_shadows>
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    <size>9.05 0.05</size>
+                    </plane>
+                </geometry>
+                <material>
+                    <script>
+                    <uri>file://media/materials/scripts/gazebo.material</uri>
+                    <name>Gazebo/White</name>
+                    </script>
+                </material>
+            </visual>
+            <visual name='endline_1'>
+                <pose>-4.5 0 0.011 0 -0 0</pose>
+                <cast_shadows>0</cast_shadows>
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    <size>0.05 6.05</size>
+                    </plane>
+                </geometry>
+                <material>
+                    <script>
+                    <uri>file://media/materials/scripts/gazebo.material</uri>
+                    <name>Gazebo/White</name>
+                    </script>
+                </material>
+            </visual>
+            <visual name='endline_2'>
+                <pose>4.5 0 0.011 0 -0 0</pose>
+                <cast_shadows>0</cast_shadows>
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    <size>0.05 6.05</size>
+                    </plane>
+                </geometry>
+                <material>
+                    <script>
+                    <uri>file://media/materials/scripts/gazebo.material</uri>
+                    <name>Gazebo/White</name>
+                    </script>
+                </material>
+            </visual>
+            <visual name='halfway_line'>
+                <pose>0 0 0.011 0 -0 0</pose>
+                <cast_shadows>0</cast_shadows>
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    <size>0.05 6.05</size>
+                    </plane>
+                </geometry>
+                <material>
+                    <script>
+                    <uri>file://media/materials/scripts/gazebo.material</uri>
+                    <name>Gazebo/White</name>
+                    </script>
+                </material>
+            </visual>
+
+            <velocity_decay>
+            <linear>0</linear>
+            <angular>0</angular>
+            </velocity_decay>
+            <self_collide>0</self_collide>
+            <kinematic>0</kinematic>
+            <gravity>1</gravity>
+        </link>
+        <pose>0 0 0 0 0 0</pose>
+    </model>
+
+    <!-- blue point light -->
+    <!--
+    <light type="point" name="spot">
+      <pose>0 0 0 0 0 0</pose>
+      <diffuse>0 0 1 1</diffuse>
+      <specular>.1 .1 .1 1</specular>
+      <attenuation>
+        <range>1</range>
+        <linear>0.2</linear>
+        <constant>0.8</constant>
+        <quadratic>0.01</quadratic>
+      </attenuation>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    -->
+
+    <!-- green spot light -->
+    <!-- 
+    <light type="spot" name="spot">
+      <pose>0 0 0 0 0 0</pose>
+      <diffuse>1 0 0 1</diffuse>
+      <specular>.2 .2 .2 1</specular>
+      <attenuation>
+        <range>1</range>
+        <linear>0.10</linear>
+        <constant>0.1</constant>
+        <quadratic>0.0</quadratic>
+      </attenuation>
+      <direction>0 0 -1</direction>
+      <spot>
+        <inner_angle>0.02</inner_angle>
+        <outer_angle>0.15</outer_angle>
+        <falloff>1</falloff>
+      </spot>
+      <cast_shadows>true</cast_shadows>
+    </light>
+    -->
+
+    <light name='user_directional_light_0' type='directional'>
+      <pose frame=''>0 0 3 0 0 0</pose>
+      <diffuse>0.5 0.5 0.5 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <direction>0.1 0.1 -0.9</direction>
+      <attenuation>
+        <range>20</range>
+        <constant>0.5</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <cast_shadows>1</cast_shadows>
+    </light>
+
+    <state world_name="demo">
+      <light name='user_directional_light_0'>
+        <pose frame=''>0 0 3 0 0 0</pose>
+      </light>
+    </state>
+
+    <include> <uri>model://sun</uri> </include>
+    <include><uri>model://ground_plane</uri></include>
+
+  </world>
+</sdf>
