@@ -15,11 +15,9 @@ As a recent breakthrough, [**Generative Adversarial Imitation Learning**](https:
 
 ## Building & Running
 ### Dependencies
-* [Unity3D](http://beta.unity3d.com/download/fd37f3680b5f/unity-editor_amd64-2017.2.0b11.deb)
 * [Universal Robot](https://github.com/mingfeisun/universal_robot)
 * [Gazebo 8.0](https://github.com/mingfeisun/gazebo)
 * [Gazebo ros pkg](https://github.com/mingfeisun/gazebo_ros_pkgs)
-* [ROS#](https://github.com/siemens/ros-sharp/wiki)
 
 ### Building
 ``` bash
