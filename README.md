@@ -9,6 +9,8 @@ As a recent breakthrough, [**Generative Adversarial Imitation Learning**](https:
 * GAIL method:
 * * [Source codes](https://github.com/mingfeisun/GAIL-janathan)
 * * Modification
+* Training and testing GAIL
+* Slides to show demon (10min, due date: 22rd Nov)
 
 ## Building & Running
 ### Dependencies
