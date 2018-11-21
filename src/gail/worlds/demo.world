@@ -11,7 +11,7 @@
     </gui>
 
     <physics type="ode">
-      <real_time_update_rate>3000</real_time_update_rate>
+      <real_time_update_rate>1000</real_time_update_rate>
     </physics>
 
     <model name='RoboCup 14 SPL Field'>
@@ -146,6 +146,31 @@
         </link>
         <pose>0 0 0 0 0 0</pose>
     </model>
+
+    <!--
+    <actor name="actor">
+        <pose>0 0.50 1.07 0 0 -2.50</pose>
+        <skin>
+            <filename>moonwalk.dae</filename>
+        </skin>
+        <animation name="striking">
+            <filename>/home/mingfei/Documents/RobotManipulationProject/mocap/62/62_03.bvh</filename>
+        </animation>
+        <script>
+            <delay_start>0</delay_start>
+            <trajectory id="0" type="striking">
+                <waypoint>
+                    <time>0</time>
+                    <pose>1.5 1.03 0 0 -2.5 0</pose>
+                </waypoint>
+                <waypoint>
+                    <time>100</time>
+                    <pose>1.5 1.03 0 0 -2.5 0</pose>
+                </waypoint>
+            </trajectory>
+        </script>
+    </actor>
+    -->
 
     <!-- blue point light -->
     <!--
