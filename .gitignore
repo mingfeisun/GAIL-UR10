@@ -1,6 +1,12 @@
+# vim
 *~
 *pyc
 
+# build files
 build/
 devel/
 .vscode
+
+# mocap
+mocap/video/
+mocap/video-animation/

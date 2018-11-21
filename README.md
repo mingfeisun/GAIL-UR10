@@ -5,6 +5,15 @@ As a recent breakthrough, [**Generative Adversarial Imitation Learning**](https:
 ## TODO list
 ### Mocap Data processing
 * Source mocap data [Subject #62(construction work, random motions)](http://mocap.cs.cmu.edu/search.php?subjectnumber=62)
+* Two demos
+
+*62_03*
+
+<img src="mocap/62_03_video.gif" alt="demo1" height="200px"/> <img src="mocap/62_03_ani.gif" alt="demo1" height="200px"/>
+
+*62_07*
+
+<img src="mocap/62_07_video.gif" alt="demo2" height="200px"/> <img src="mocap/62_07_ani.gif" alt="demo2" height="200px"/>
 
 ### UR10 robot interface
 * DOF control interface
