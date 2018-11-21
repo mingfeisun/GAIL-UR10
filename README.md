@@ -18,6 +18,8 @@ As a recent breakthrough, [**Generative Adversarial Imitation Learning**](https:
 ### UR10 robot interface
 * DOF control interface
 
+<img src="docs/ur10_frames.png" alt="ur10" width="550px"/>
+
 ### GAIL codes
 * [To install dependencies](https://github.com/mingfeisun/GAIL-janathan)
 * To run code
