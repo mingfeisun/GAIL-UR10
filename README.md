@@ -22,6 +22,15 @@ As a recent breakthrough, [**Generative Adversarial Imitation Learning**](https:
 * [To install dependencies](https://github.com/mingfeisun/GAIL-janathan)
 * To run code
 
+* ~~Mocap data: [subject #62(construction work, random motions)](http://mocap.cs.cmu.edu/search.php?subjectnumber=62)~~
+* ~~UR10 robot interface: DoF control~~
+* Baseline: transformation from BVH to UR10 robot arm
+* GAIL method:
+* * [Source codes](https://github.com/mingfeisun/GAIL-janathan)
+* * Modification
+* Training and testing GAIL
+* Slides to show demo (10min, due date: 22rd Nov)
+
 ## Building & Running
 ### Dependencies
 * [Universal Robot](https://github.com/mingfeisun/universal_robot)
@@ -33,9 +42,3 @@ As a recent breakthrough, [**Generative Adversarial Imitation Learning**](https:
 # compiling ros pkgs
 catkin_make
 ```
-
-### Running 
-TODO
-
-## Misc
-TODO
