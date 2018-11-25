@@ -15,7 +15,7 @@ As a recent breakthrough, [**Generative Adversarial Imitation Learning**](https:
 
 <img src="mocap/62_07_video.gif" alt="demo2" height="200px"/> <img src="mocap/62_07_ani.gif" alt="demo2" height="200px"/>
 
-* Broadcasting BVH as tf to rviz 
+* Broadcasting BVH as tf to rviz, e.g., the guy is laughing
 
 <img src="docs/tf_broadcaster.gif" alt="tf_broadcasting" width="550px"/>
 
@@ -34,12 +34,14 @@ As a recent breakthrough, [**Generative Adversarial Imitation Learning**](https:
 
 * ~~Mocap data: [subject #62(construction work, random motions)](http://mocap.cs.cmu.edu/search.php?subjectnumber=62)~~
 * ~~UR10 robot interface: DoF control~~
-* Baseline: transformation from BVH to UR10 robot arm
+* ~~Baseline: transformation from BVH to UR10 robot arm~~
 * GAIL method:
-* * [Source codes](https://github.com/mingfeisun/GAIL-janathan)
+* * ~~[Source codes](https://github.com/mingfeisun/RL_baselines/tree/master/baselines/gail)~~
 * * Modification
+* MoCap GAIL: [source codes](https://github.com/ywchao/merel-mocap-gail)
+* * A demo from MoCap GAIL
 * Training and testing GAIL
-* Slides to show demo (10min, due date: 22rd Nov)
+* ~~Slides to show demo (10min, due date: 22rd Nov)~~
 
 ## Building & Running
 ### Dependencies
