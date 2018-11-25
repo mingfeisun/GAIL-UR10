@@ -128,8 +128,16 @@ class RobotControl:
         pose_goal.position.z = _z
 
         return pose_goal
-
+    
 if __name__ == "__main__":
     rospy.init_node('robot_move_ur', anonymous=True)
     test = RobotControl()
     test.initRobotPose()
+
+    while not rospy.is_shutdown():
+        waypoints = []
+        waypoints.append(test.generateRobotPose(0.7, -0.7, 0.1))
+        waypoints.append(test.generateRobotPose(0.4, -0.4, 0.4))
+        waypoints.append(test.generateRobotPose(0.7, -0.7, 0.09))
+        (plan, _) = test.group_man.compute_cartesian_path(waypoints, 0.01, 0.0)
+        test.group_man.execute(plan, wait=True)

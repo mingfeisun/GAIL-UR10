@@ -10,3 +10,6 @@ devel/
 # mocap
 mocap/video/
 mocap/video-animation/
+
+# misc
+meeting/
