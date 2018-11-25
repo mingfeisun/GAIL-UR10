@@ -15,10 +15,18 @@ As a recent breakthrough, [**Generative Adversarial Imitation Learning**](https:
 
 <img src="mocap/62_07_video.gif" alt="demo2" height="200px"/> <img src="mocap/62_07_ani.gif" alt="demo2" height="200px"/>
 
+* Broadcasting BVH as tf to rviz 
+
+<img src="docs/tf_broadcaster.gif" alt="tf_broadcasting" width="550px"/>
+
 ### UR10 robot interface
 * DOF control interface
 
 <img src="docs/ur10_frames.png" alt="ur10" width="550px"/>
+
+* Robot motions (sawing-like)
+
+<img src="docs/sawing_robot.gif" alt="sawing_robot" width="550px"/>
 
 ### GAIL codes
 * [To install dependencies](https://github.com/mingfeisun/GAIL-janathan)
