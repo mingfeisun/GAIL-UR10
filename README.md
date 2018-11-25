@@ -41,6 +41,9 @@ A demo to showcase MoCap GAIL
 * ~~Baseline: transformation from BVH to UR10 robot arm~~
 * GAIL method:
 * * ~~[Source codes](https://github.com/mingfeisun/RL_baselines/tree/master/baselines/gail)~~
+
+<img src="docs/gail_result.gif" alt="sawing_robot" width="550px"/>
+
 * * Modification
 * MoCap GAIL: [source codes](https://github.com/ywchao/merel-mocap-gail)
 * Training and testing GAIL
