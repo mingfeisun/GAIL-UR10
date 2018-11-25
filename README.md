@@ -15,7 +15,7 @@ As a recent breakthrough, [**Generative Adversarial Imitation Learning**](https:
 
 <img src="mocap/62_07_video.gif" alt="demo2" height="200px"/> <img src="mocap/62_07_ani.gif" alt="demo2" height="200px"/>
 
-* Broadcasting BVH as tf to rviz 
+* Broadcasting BVH as tf to rviz, e.g., the guy is laughing
 
 <img src="docs/tf_broadcaster.gif" alt="tf_broadcasting" width="550px"/>
 
