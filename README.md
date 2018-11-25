@@ -34,12 +34,14 @@ As a recent breakthrough, [**Generative Adversarial Imitation Learning**](https:
 
 * ~~Mocap data: [subject #62(construction work, random motions)](http://mocap.cs.cmu.edu/search.php?subjectnumber=62)~~
 * ~~UR10 robot interface: DoF control~~
-* Baseline: transformation from BVH to UR10 robot arm
+* ~~Baseline: transformation from BVH to UR10 robot arm~~
 * GAIL method:
-* * [Source codes](https://github.com/mingfeisun/GAIL-janathan)
+* * ~~[Source codes](https://github.com/mingfeisun/RL_baselines/tree/master/baselines/gail)~~
 * * Modification
+* MoCap GAIL: [source codes](https://github.com/ywchao/merel-mocap-gail)
+* * A demo from MoCap GAIL
 * Training and testing GAIL
-* Slides to show demo (10min, due date: 22rd Nov)
+* ~~Slides to show demo (10min, due date: 22rd Nov)~~
 
 ## Building & Running
 ### Dependencies
