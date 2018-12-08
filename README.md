@@ -52,7 +52,57 @@ A demo to showcase MoCap GAIL
 ### TODO
 * To define the state and actions for UR10 robot arm: what's the learned policy?
 
+*state* definition (observations)
 
+[hopper.py](https://github.com/openai/gym/blob/master/gym/envs/mujoco/hopper.py#L24)
+``` python
+    def _get_obs(self):
+        return np.concatenate([
+            self.sim.data.qpos.flat[1:],
+            np.clip(self.sim.data.qvel.flat, -10, 10)
+        ])
+```
+
+*action* definition
+
+[mujoco_env.py](https://github.com/openai/gym/blob/master/gym/envs/mujoco/mujoco_env.py#L98)
+``` python
+    def do_simulation(self, ctrl, n_frames):
+        self.sim.data.ctrl[:] = ctrl
+        for _ in range(n_frames):
+            self.sim.step()
+```
+
+[RobotMoveURRobot](https://github.com/mingfeisun/TransparencyRLfD/blob/master/src/main/scripts/RobotMoveURRobot.py#L130)
+``` python
+    def initRobotPose(self):
+        JOINT_NAMES = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 
+            'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
+
+        # [144.593816163399, 5.754934304529601, 7.194142435155028, 10.61821127013265, 4.675844406769917, 7.934736338099062]
+        Q1 = [0.009653124896662924, -0.6835756311532828, 1.0619281313412259, -0.3737989105267019, 0, 0]
+        Q2 = [0.009653124896662924, -0.6835756311532828, 1.170799852990027, -2.05, -1.57, 0]
+        # Q3 = [0.009653124896662924, -0.6835756311532828, 1.170799852990027, -1.9876127002995183, 4.681749171284383, 1.8825401280344316]
+        # Q2 = [1.5,0,-1.57,0,0,0]
+        # Q3 = [1.5,-0.2,-1.57,0,0,0]
+
+        g = FollowJointTrajectoryGoal()
+
+        g.trajectory = JointTrajectory()
+        g.trajectory.joint_names = JOINT_NAMES
+
+        g.trajectory.points = [
+            JointTrajectoryPoint(positions=Q1, velocities=[0]*6, time_from_start=rospy.Duration(3.0)), 
+            JointTrajectoryPoint(positions=Q2, velocities=[0]*6, time_from_start=rospy.Duration(6.0))
+            # JointTrajectoryPoint(positions=Q3, velocities=[0]*6, time_from_start=rospy.Duration(6.0))
+        ]
+
+        self.joint_client.send_goal(g)
+        try:
+            self.joint_client.wait_for_result()
+        except KeyboardInterrupt:
+            self.joint_client.cancel_goal()
+```
 
 * To find the state and actions for MoCap data: what's the expert policy?
 
