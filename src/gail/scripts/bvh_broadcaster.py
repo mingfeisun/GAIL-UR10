@@ -1,8 +1,10 @@
+#!/usr/bin/env python
 import tf
 import math
 import numpy
 import rospy
 import string
+import argparse
 
 # Node
 class Node:
@@ -22,9 +24,6 @@ class Node:
 
 # BVHReader
 class BVHReader:
-    """Read BioVision Hierarchical (BVH) files.
-    """
-
     def __init__(self, filename):
 
         self.filename = filename
@@ -330,20 +329,6 @@ class BVHBroadcaster(BVHReader):
                           self.scaling_factor * (root.offset[1]), 
                           self.scaling_factor * (root.offset[2]))
 
-        if root.isRoot():
-            theta = math.radians(90)
-            c = math.cos(theta)
-            s = math.sin(theta)
-            mat_x_rot = numpy.array([ [1.,0.,0.],
-                                      [0., c,-s],
-                                      [0., s, c]])
-            mat_z_rot = numpy.array([ [ c,-s,0.,0.],
-                                      [ s, c,0.,0.],
-                                      [0.,0.,1.,0.],
-                                      [0.,0.,0.,1.] ])
-            temp_trans = numpy.matmul(mat_x_rot, temp_trans)
-            mat_rot = numpy.matmul(mat_rot, mat_z_rot)
-
         temp_rot = tf.transformations.quaternion_from_matrix(mat_rot)
 
         self.br.sendTransform(temp_trans, temp_rot, rospy.Time.now(), root.name, parent_frame)
@@ -355,18 +340,44 @@ class BVHBroadcaster(BVHReader):
         self.read()
         rate = rospy.Rate(1/self.dt)
 
-        while 1:
+        while not rospy.is_shutdown():
             for ind in range(self.num_motions):
                 self.counter = 0
                 self.this_motion = self.all_motions[ind]
 
                 self.broadcastRootJoint(self._root, self.root_frame)
+                if rospy.is_shutdown():
+                    break
                 rate.sleep()
             if not loop:
                 break
 
-if __name__ == "__main__":
-    rospy.init_node('test')
-    file_name = "/home/mingfei/Documents/RobotManipulationProject/mocap/62/62_07.bvh"
-    bvh_test = BVHBroadcaster(file_name, 'world')
+def argsparser():
+    parser = argparse.ArgumentParser("python BVHBroadcaster.py")
+    parser.add_argument('bvh_file', help="A path to bvh file that you want to broadcast")
+    parser.add_argument('base_frame', help="An existing frame in rviz on which the skeleton will be loaded")
+    parser.add_argument('-n', '--name', help="Node name, default: BVHBroadcaster", default="BVHBroadcaster")
+    parser.add_argument('-l', '--loop', help="Loop broadcasting", action="store_true")
+    return parser.parse_args()
+
+def main(args):
+    rospy.init_node(args.name)
+    # file_name = "/home/mingfei/Documents/RobotManipulationProject/mocap/62/62_07.bvh"
+    bvh_test = BVHBroadcaster(args.bvh_file, args.base_frame)
+    rospy.loginfo("Broadcasting bvh file (%s) on frame %s"%(args.bvh_file, args.base_frame))
+    if args.loop:
+        rospy.loginfo("Loop")
+    else: 
+        rospy.loginfo("Only once")
+    bvh_test.broadcast(loop=args.loop)
+    rospy.loginfo("Broadcasting done")
+
+def test():
+    rospy.init_node("BVHBroadcaster")
+    file_name = "/home/mingfei/Documents/projects/RobotManipulationProject/mocap/62/62_07.bvh"
+    bvh_test = BVHBroadcaster(file_name, "world")
     bvh_test.broadcast(loop=True)
+
+if __name__ == "__main__":
+    args = argsparser()
+    main(args)
