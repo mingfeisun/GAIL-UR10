@@ -49,6 +49,72 @@ A demo to showcase MoCap GAIL
 * Training and testing GAIL
 * ~~Slides to show demo (10min, due date: 22rd Nov)~~
 
+### TODO
+* To define the state and actions for UR10 robot arm: what's the learned policy?
+
+
+
+* To find the state and actions for MoCap data: what's the expert policy?
+
+[collect_cmu_mocap.py](https://github.com/ywchao/baselines/blob/05a64203efbfac6eba630001d56b48e950d4d885/data/collect_cmu_mocap.py#L19)
+``` python
+def main(args):
+    env = humanoid_CMU.run()
+
+    print('collecting cmu mocap data ... ')
+
+    assert args.data_path is not None
+    amc_qpos = []
+    amc_obs = []
+    for i in _SUBJECT_AMC_ID:
+        file_path = os.path.join(args.data_path,
+                                 'subjects','{:02d}'.format(_SUBJECT_ID),
+                                 '{:02d}_{:02d}.amc'.format(_SUBJECT_ID,i))
+        converted = parse_amc.convert(
+            file_path, env.physics, env.control_timestep())
+
+        qpos_seq = []
+        obs_seq = []
+        for t in range(converted.qpos.shape[-1] - 1):
+            p_t = converted.qpos[:, t + 1]
+            v_t = converted.qvel[:, t]
+            qpos_seq.append(np.concatenate((p_t, v_t))[None])
+            with env.physics.reset_context():
+                env.physics.data.qpos[:] = p_t
+                env.physics.data.qvel[:] = v_t
+            obs = get_humanoid_cmu_obs(env)
+            obs_seq.append(obs[None])
+
+        amc_qpos.append(np.concatenate(qpos_seq))
+        amc_obs.append(np.concatenate(obs_seq))
+
+    if not os.path.isfile(args.save_file):
+        np.savez(args.save_file, obs=amc_obs, qpos=amc_qpos)
+
+    print('done.')
+```
+[dm_control_util.py](https://github.com/ywchao/baselines/blob/05a64203efbfac6eba630001d56b48e950d4d885/baselines/common/dm_control_util.py#L7)
+``` python
+def get_humanoid_cmu_obs(env):
+    # Assumes env is an instance of `HumanoidCMU`.
+    obs = env.task.get_observation(env.physics)
+    # Add head to extremities
+    torso_frame = env.physics.named.data.xmat['thorax'].reshape(3, 3)
+    torso_pos = env.physics.named.data.xpos['thorax']
+    torso_to_head = env.physics.named.data.xpos['head'] - torso_pos
+    positions = torso_to_head.dot(torso_frame)
+    obs['extremities'] = np.hstack((obs['extremities'], positions))
+    # Remove joint_angles, head_height, velocity
+    del obs['joint_angles']
+    del obs['head_height']
+    del obs['velocity']
+    # Flatten observation
+    return flatten_observation(obs)['observations']
+```
+
+* To convert MoCap state+action space to UR10 robot arm
+* To construct GAN: *G(s, a)* and *D(s, a)*
+
 ## Building & Running
 ### Dependencies
 * [Universal Robot](https://github.com/mingfeisun/universal_robot)
