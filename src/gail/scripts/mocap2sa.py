@@ -6,6 +6,7 @@ import rospy
 import roslib
 
 from geometry_msgs.msg import Pose
+from std_msgs.msg import Float32
 
 from bvh_broadcaster import BVHBroadcaster
 
@@ -19,8 +20,19 @@ class Mocap2SA:
         self.mocap_ee_parent_frame = 'Hips'
         self.mocap_ee_child_frame = 'RightHandIndex1'
         self.ur10_base_frame = 'base_link'
+        self.pose_list = []
 
     def __call__(self):
+        self.dt = rospy.get_param('bvh_dt')
+        if self.dt == None:
+            return
+        rate = rospy.Rate(1/self.dt)
+        print('Converting')
+        while not rospy.is_shutdown():
+            rate.sleep()
+            self.get_pose()
+
+    def get_pose(self):
         (trans, rot) = self.tf_listener.lookupTransform(self.mocap_ee_child_frame, self.mocap_ee_parent_frame, rospy.Time(0))
         trans_mat = tf.transformations.translation_matrix(trans)
         rot_mat = tf.transformations.quaternion_matrix(rot)
@@ -33,14 +45,21 @@ class Mocap2SA:
 
         matrix_s = numpy.matmul(tf_b_s, matrix_b)
 
-        posi = tf.transformations.translation_from_matrix(pose_s)
-        orien = tf.transformations.orientation_from_matrix(pose_s)
+        posi = tf.transformations.translation_from_matrix(matrix_s)
+        orien = tf.transformations.quaternion_from_matrix(matrix_s)
 
         pose_s = Pose(position=posi, orientation=orien)
-        print(pose_s)
+        self.pose_list.append(pose_s)
+
+    def save_pose(self):
+        print('Saving')
+        numpy.save('mocap.npy', self.pose_list)
+        print('Done')
 
 if __name__ == "__main__":
     rospy.init_node('mocap2sa')
     converter = Mocap2SA()
-    rospy.sleep(0.5)
-    converter()
+    try:
+        converter()
+    except rospy.ROSInterruptException:
+        converter.save_pose()

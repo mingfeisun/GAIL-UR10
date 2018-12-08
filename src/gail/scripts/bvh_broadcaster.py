@@ -5,6 +5,7 @@ import numpy
 import rospy
 import string
 import argparse
+import std_msgs
 
 # Node
 class Node:
@@ -251,6 +252,7 @@ class BVHBroadcaster(BVHReader):
 
     def onMotion(self, frames, dt):
         self.dt = dt
+        rospy.set_param('bvh_dt', self.dt)
         self.num_motions = frames
 
     def onFrame(self, values):
