@@ -379,5 +379,6 @@ def test():
     bvh_test.broadcast(loop=True)
 
 if __name__ == "__main__":
-    args = argsparser()
-    main(args)
+    test()
+    # args = argsparser()
+    # main(args)
