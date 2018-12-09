@@ -376,8 +376,8 @@ def main(args):
 
 def test():
     rospy.init_node("BVHBroadcaster")
-    file_name = "/home/mingfei/Documents/projects/RobotManipulationProject/mocap/62/62_07.bvh"
-    bvh_test = BVHBroadcaster(file_name, "world")
+    file_name = "/home/mingfei/Documents/projects/RobotManipulationProject/mocap/62/62_03.bvh"
+    bvh_test = BVHBroadcaster(file_name, "base_link")
     bvh_test.broadcast(loop=True)
 
 if __name__ == "__main__":
