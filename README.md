@@ -162,6 +162,14 @@ def get_humanoid_cmu_obs(env):
     return flatten_observation(obs)['observations']
 ```
 
+* Learning the end-effector motions:
+*Generator*:
+* * observations: end-effector poses + twist
+* * action: joint configurations + twist
+* * policy: actions --> observations
+*Discriminator*:
+* * GAN: generated observations <-- --> demonstrated observations
+
 * To convert MoCap state+action space to UR10 robot arm
 * To construct GAN: *G(s, a)* and *D(s, a)*
 
