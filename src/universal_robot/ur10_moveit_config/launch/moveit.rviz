@@ -4,11 +4,17 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /MotionPlanning1
+        - /MotionPlanning1/Scene Geometry1
+        - /MotionPlanning1/Scene Robot1
+        - /MotionPlanning1/Planning Request1
+        - /MotionPlanning1/Planning Metrics1
+        - /MotionPlanning1/Planned Path1
         - /TF1
         - /TF1/Frames1
+        - /Pose1
+        - /Pose1/Status1
       Splitter Ratio: 0.5
-    Tree Height: 846
+    Tree Height: 818
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -162,7 +168,7 @@ Visualization Manager:
       Planning Scene Topic: move_group/monitored_planning_scene
       Robot Description: robot_description
       Scene Geometry:
-        Scene Alpha: 0.899999976
+        Scene Alpha: 0.200000003
         Scene Color: 50; 230; 50
         Scene Display Time: 0.200000003
         Show Scene Geometry: true
@@ -274,11 +280,11 @@ Visualization Manager:
         RHipJoint:
           Value: true
         RThumb:
-          Value: true
+          Value: false
         RightArm:
           Value: true
         RightFingerBase:
-          Value: true
+          Value: false
         RightFoot:
           Value: true
         RightForeArm:
@@ -286,7 +292,7 @@ Visualization Manager:
         RightHand:
           Value: true
         RightHandIndex1:
-          Value: true
+          Value: false
         RightLeg:
           Value: true
         RightShoulder:
@@ -302,30 +308,30 @@ Visualization Manager:
         base:
           Value: false
         base_link:
-          Value: false
+          Value: true
         ee_link:
-          Value: false
+          Value: true
         forearm_link:
-          Value: false
+          Value: true
         shoulder_link:
-          Value: false
+          Value: true
         tool0:
           Value: false
         upper_arm_link:
-          Value: false
+          Value: true
         world:
           Value: false
         wrist_1_link:
-          Value: false
+          Value: true
         wrist_2_link:
-          Value: false
+          Value: true
         wrist_3_link:
-          Value: false
-      Marker Scale: 0.699999988
+          Value: true
+      Marker Scale: 0.300000012
       Name: TF
       Show Arrows: true
-      Show Axes: false
-      Show Names: false
+      Show Axes: true
+      Show Names: true
       Tree:
         world:
           Hips:
@@ -381,6 +387,37 @@ Visualization Manager:
                           {}
       Update Interval: 0
       Value: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: false
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+      Name: RobotModel
+      Robot Description: robot_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: false
+      Visual Enabled: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.100000001
+      Class: rviz/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.0299999993
+      Head Radius: 0.0500000007
+      Name: Pose
+      Shaft Length: 1
+      Shaft Radius: 0.00999999978
+      Shape: Axes
+      Topic: /mocap_ee_pose
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -406,37 +443,37 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.67082262
+      Distance: 3.84738898
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.0414134748
-        Y: 0.282606691
-        Z: 0.930312097
+        X: -1.06047332
+        Y: 0.33544746
+        Z: -0.390684098
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.374797463
+      Pitch: 0.344797611
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.20857143
+      Yaw: 0.452192694
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1056
+  Height: 1028
   Hide Left Dock: false
   Hide Right Dock: true
   MotionPlanning:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000001dd000003dafc020000000bfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c0061007900730100000028000003da000000d700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e006701000001fc000001cb0000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000001600000016fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006700000001d5000001f20000018300ffffff000000010000010f000002affc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d000002af000000ad00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004b00000003efc0100000002fb0000000800540069006d00650000000000000004b00000030000fffffffb0000000800540069006d0065010000000000000450000000000000000000000570000003da00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000002ad000003befc020000000bfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c0061007900730100000028000003be000000d700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e006701000001fc000001cb0000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000001600000016fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006700000001f4000001f20000018300ffffff000000010000010f000002affc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003d000002af000000ad00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004b00000003efc0100000002fb0000000800540069006d00650000000000000004b00000030000fffffffb0000000800540069006d00650100000000000004500000000000000000000004a0000003be00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -447,4 +484,4 @@ Window Geometry:
     collapsed: true
   Width: 1875
   X: 45
-  Y: 24
+  Y: 27

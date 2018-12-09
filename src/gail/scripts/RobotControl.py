@@ -5,13 +5,13 @@ import actionlib
 import sys
 import copy
 import random
-import numpy
+import numpy as np
 import rospy
 import moveit_commander
 from moveit_commander import RobotTrajectory
 import moveit_msgs.msg
 import geometry_msgs.msg
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose, PoseStamped
 from math import pi, cos, sin
 
 from moveit_commander.conversions import pose_to_list
@@ -47,7 +47,7 @@ class RobotControl:
         self.robot_pose.position.y = 0.0
         self.robot_pose.position.z = 0.8
 
-        self.addCollision()
+        # self.addCollision()
 
     def initRobotPose(self):
         JOINT_NAMES = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 
@@ -77,6 +77,7 @@ class RobotControl:
         except KeyboardInterrupt:
             self.joint_client.cancel_goal()
     
+    '''
     def addCollision(self):
         collision_bottom_pose = geometry_msgs.msg.PoseStamped()
         collision_bottom_pose.header.frame_id = "world"
@@ -101,6 +102,7 @@ class RobotControl:
         collision_top_pose.pose.position.z = 1.0
         collision_top_name = "collision_top"
         self.scene.add_box(collision_top_name, collision_top_pose, size=(2, 2, 0.2))
+    '''
 
     def moveArmToPose(self, _pose_goal):
         self.group_man.set_pose_target(_pose_goal)
@@ -128,16 +130,46 @@ class RobotControl:
         pose_goal.position.z = _z
 
         return pose_goal
+
+    def obs2actions(self, _obs_list):
+        assert isinstance(_obs_list[0], Pose)
+
+        n_obs = len(_obs_list)
+
+        waypoints = []
+        for obs in _obs_list:
+            waypoints.append(copy.deepcopy(obs))
+
+        self.moveArmToPose(waypoints[0])
+
+        (plan, _) = self.group_man.compute_cartesian_path(waypoints[1:], 0.001, 0.0)
+        n_poitns = len(plan.joint_trajectory.points)
+
+        self.group_man.execute(plan, wait=True)
+
+    def subscribe_to_pose(self):
+        rospy.Subscriber('/mocap_ee_pose', PoseStamped, self.cb_pose_copy)
+        while not rospy.is_shutdown():
+            pass
+
+    def cb_pose_copy(self, pose_msg):
+        temp_pose = pose_msg.pose
+        self.moveArmToPose(temp_pose)
     
 if __name__ == "__main__":
     rospy.init_node('robot_move_ur', anonymous=True)
     test = RobotControl()
-    test.initRobotPose()
+    # test.initRobotPose()
 
-    while not rospy.is_shutdown():
-        waypoints = []
-        waypoints.append(test.generateRobotPose(0.7, -0.7, 0.1))
-        waypoints.append(test.generateRobotPose(0.4, -0.4, 0.4))
-        waypoints.append(test.generateRobotPose(0.7, -0.7, 0.09))
-        (plan, _) = test.group_man.compute_cartesian_path(waypoints, 0.01, 0.0)
-        test.group_man.execute(plan, wait=True)
+    # test.subscribe_to_pose()
+
+    obs_list = np.load('mocap.npy')
+    test.obs2actions(obs_list)
+
+    # while not rospy.is_shutdown():
+    #     waypoints = []
+    #     waypoints.append(test.generateRobotPose(0.7, -0.7, 0.1))
+    #     waypoints.append(test.generateRobotPose(0.4, -0.4, 0.4))
+    #     waypoints.append(test.generateRobotPose(0.7, -0.7, 0.09))
+    #     (plan, _) = test.group_man.compute_cartesian_path(waypoints, 0.01, 0.0)
+    #     test.group_man.execute(plan, wait=True)
