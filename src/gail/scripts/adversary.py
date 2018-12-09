@@ -17,7 +17,7 @@ def logit_bernoulli_entropy(logits):
     ent = (1.-tf.nn.sigmoid(logits))*logits - logsigmoid(logits)
     return ent
 
-class GAN(object):
+class Adversary(object):
     def __init__(self, state_shape, action_shape, hidden_size, entcoeff=0.001, lr_rate=1e-3, scope="adversary"):
         self.scope = scope
         self.observation_shape = state_shape
