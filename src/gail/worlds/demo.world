@@ -11,7 +11,7 @@
     </gui>
 
     <physics type="ode">
-      <real_time_update_rate>1000</real_time_update_rate>
+      <real_time_update_rate>5000</real_time_update_rate>
     </physics>
 
     <model name='RoboCup 14 SPL Field'>

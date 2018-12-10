@@ -2,6 +2,8 @@
 import rospy
 import actionlib
 
+import util as U
+
 import sys
 import copy
 import random
@@ -143,19 +145,42 @@ class RobotControl:
         self.moveArmToPose(waypoints[0])
 
         (plan, _) = self.group_man.compute_cartesian_path(waypoints[1:], 0.001, 0.0)
-        n_poitns = len(plan.joint_trajectory.points)
+        n_points = len(plan.joint_trajectory.points)
 
-        self.group_man.execute(plan, wait=True)
+        # self.group_man.execute(plan, wait=True)
+        step_length = n_points//n_obs
+
+        x_state = []
+        y_action = []
+
+        for idx in range(n_obs):
+            tmp_state = _obs_list[idx]
+            x_state.append([tmp_state.position.x, 
+                            tmp_state.position.y, 
+                            tmp_state.position.z, 
+                            tmp_state.orientation.x,
+                            tmp_state.orientation.y,
+                            tmp_state.orientation.z,
+                            tmp_state.orientation.w
+                            ])
+            tmp_action = plan.joint_trajectory.points[idx]
+            tmp_action_list = []
+            tmp_action_list.extend(tmp_action.positions)
+            tmp_action_list.extend(tmp_action.velocities)
+            tmp_action_list.extend(tmp_action.accelerations)
+            y_action.append(tmp_action_list)
+
+        x_state = np.array(x_state)
+        y_action = np.array(y_action)
+
+        rospy.loginfo('State-action pairs saved!')
+        np.savez(U.getPath() + '/state_action.npz', state=x_state, action=y_action)
 
     def subscribe_to_pose(self):
         rospy.Subscriber('/mocap_ee_pose', PoseStamped, self.cb_pose_copy)
         while not rospy.is_shutdown():
             pass
 
-    def cb_pose_copy(self, pose_msg):
-        temp_pose = pose_msg.pose
-        self.moveArmToPose(temp_pose)
-    
 if __name__ == "__main__":
     rospy.init_node('robot_move_ur', anonymous=True)
     test = RobotControl()
@@ -163,7 +188,7 @@ if __name__ == "__main__":
 
     # test.subscribe_to_pose()
 
-    obs_list = np.load('mocap.npy')
+    obs_list = np.load(U.getPath() + '/mocap.npy')
     test.obs2actions(obs_list)
 
     # while not rospy.is_shutdown():
