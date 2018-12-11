@@ -4,13 +4,14 @@ import math
 import numpy
 import rospy
 import roslib
+import util as U_
 
 from geometry_msgs.msg import Pose, PoseStamped
 from std_msgs.msg import Float32, Header
 
 from bvh_broadcaster import BVHBroadcaster
 
-class Mocap2SA:
+class Mocap2ObsAcs:
     '''
     learning end-effector motion
     '''
@@ -73,12 +74,12 @@ class Mocap2SA:
 
     def save_pose(self):
         print('Saving')
-        numpy.save('mocap.npy', self.pose_list)
+        numpy.save(U_.getDataPath() + '/mocap.npy', self.pose_list)
         print('Done')
 
 if __name__ == "__main__":
     rospy.init_node('mocap2sa')
-    converter = Mocap2SA()
+    converter = Mocap2ObsAcs()
     try:
         converter()
     except rospy.ROSInterruptException:

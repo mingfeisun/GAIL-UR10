@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 import rospy
 import actionlib
 
-import util as U
+import util as U_
 
 import sys
 import copy
@@ -23,6 +23,7 @@ from trajectory_msgs.msg import *
 
 class RobotControl:
     def __init__(self):
+        rospy.init_node('robot_move_ur', anonymous=True)
         self.robot = moveit_commander.RobotCommander()
 
         self.scene = moveit_commander.PlanningSceneInterface()
@@ -132,6 +133,57 @@ class RobotControl:
         pose_goal.position.z = _z
 
         return pose_goal
+    
+    def reset(self):
+        # need to return end-effector pose
+        self.initRobotPose()
+        return self.group_man.get_current_pose().pose
+
+    def _act(self, positions, velocities):
+        JOINT_NAMES = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 
+            'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
+
+        g = FollowJointTrajectoryGoal()
+        g.trajectory = JointTrajectory()
+        g.trajectory.joint_names = JOINT_NAMES
+        g.trajectory.points = [ JointTrajectoryPoint(positions=positions, velocities=velocities, time_from_start=rospy.Duration(1.0))]
+
+        self.joint_client.send_goal(g)
+        try:
+            self.joint_client.wait_for_result()
+        except KeyboardInterrupt:
+            self.joint_client.cancel_goal()
+
+        return self.group_man.get_current_pose().pose
+
+    def step(self, ac):
+        return self._act(ac[:6], ac[6:])
+
+    def traj_generator(self, pi, env, horizon, stochastic, reward_giver):
+        t = 0
+        ob = self.reset()
+        cur_ep_ret = 0  # return in current episode
+        cur_ep_len = 0  # len of current episode
+
+        # Initialize history arrays
+        obs = []
+        rews = []
+        acs = []
+
+        while True:
+            ac, vpred = pi.act(stochastic, ob)
+            rew = reward_giver.get_reward(ob, ac)
+            obs.append(ob)
+            acs.append(ac)
+            rews.append(rew)
+            ob = self.step(ac)
+            if t >= horizon:
+                break
+            t += 1
+        obs = np.array(obs)
+        acs = np.array(acs)
+        traj = {"ob": obs, "ac": acs, "rew": rews}
+        return traj
 
     def obs2actions(self, _obs_list):
         assert isinstance(_obs_list[0], Pose)
@@ -147,7 +199,8 @@ class RobotControl:
         (plan, _) = self.group_man.compute_cartesian_path(waypoints[1:], 0.001, 0.0)
         n_points = len(plan.joint_trajectory.points)
 
-        # self.group_man.execute(plan, wait=True)
+        self.group_man.execute(plan, wait=True)
+
         step_length = n_points//n_obs
 
         x_state = []
@@ -167,28 +220,20 @@ class RobotControl:
             tmp_action_list = []
             tmp_action_list.extend(tmp_action.positions)
             tmp_action_list.extend(tmp_action.velocities)
-            tmp_action_list.extend(tmp_action.accelerations)
+            # tmp_action_list.extend(tmp_action.accelerations)
             y_action.append(tmp_action_list)
 
         x_state = np.array(x_state)
         y_action = np.array(y_action)
 
-        rospy.loginfo('State-action pairs saved!')
-        np.savez(U.getPath() + '/state_action.npz', state=x_state, action=y_action)
-
-    def subscribe_to_pose(self):
-        rospy.Subscriber('/mocap_ee_pose', PoseStamped, self.cb_pose_copy)
-        while not rospy.is_shutdown():
-            pass
+        rospy.loginfo('Obs-acs pairs saved!')
+        np.savez(U_.getDataPath() + '/obs_acs.npz', obs=x_state, acs=y_action)
 
 if __name__ == "__main__":
-    rospy.init_node('robot_move_ur', anonymous=True)
     test = RobotControl()
     # test.initRobotPose()
 
-    # test.subscribe_to_pose()
-
-    obs_list = np.load(U.getPath() + '/mocap.npy')
+    obs_list = np.load(U_.getDataPath() + '/mocap.npy')
     test.obs2actions(obs_list)
 
     # while not rospy.is_shutdown():
