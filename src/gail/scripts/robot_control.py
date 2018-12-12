@@ -146,7 +146,7 @@ class RobotControl:
         g = FollowJointTrajectoryGoal()
         g.trajectory = JointTrajectory()
         g.trajectory.joint_names = JOINT_NAMES
-        g.trajectory.points = [ JointTrajectoryPoint(positions=positions, velocities=velocities, time_from_start=rospy.Duration(0.5))]
+        g.trajectory.points = [ JointTrajectoryPoint(positions=positions, velocities=velocities, time_from_start=rospy.Duration(0.2))]
 
         self.joint_client.send_goal(g)
         try:

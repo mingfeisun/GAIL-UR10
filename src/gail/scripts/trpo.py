@@ -218,7 +218,7 @@ def learn(env, policy_func, reward_giver, expert_dataset, rank,
             
         # ------------------ Update G ------------------
         print("Optimizing Policy...")
-        for _ in tqdm(range(g_step)):
+        for _ in range(g_step):
             with timed("sampling"):
                 seg = seg_gen.next()
             add_vtarg_and_adv(seg, gamma, lam)
