@@ -18,12 +18,12 @@ def logit_bernoulli_entropy(logits):
     return ent
 
 class Adversary(object):
-    def __init__(self, state_shape, action_shape, hidden_size, entcoeff=0.001, lr_rate=1e-3, scope="adversary"):
+    def __init__(self, env, hidden_size, entcoeff=0.001, lr_rate=1e-3, scope="adversary"):
         self.scope = scope
-        self.observation_shape = state_shape
-        self.actions_shape = action_shape
+        self.observation_shape = env.observation_space.shape
+        self.actions_shape = env.action_space.shape
         self.input_shape = tuple([o+a for o, a in zip(self.observation_shape, self.actions_shape)])
-        self.num_actions = action_shape.shape[0]
+        self.num_actions = env.action_space.shape[0]
         self.hidden_size = hidden_size
         self.build_ph()
         # Build grpah

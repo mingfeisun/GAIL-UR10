@@ -6,13 +6,14 @@ import os
 from contextlib import contextmanager
 from mpi4py import MPI
 from collections import deque
+from tqdm import tqdm
 
 import tensorflow as tf
 import numpy as np
+import util as U_
 
 import baselines.common.tf_util as U
 from baselines.common import explained_variance, zipsame, dataset, fmt_row
-from baselines import logger
 from baselines.common import colorize
 from baselines.common.mpi_adam import MpiAdam
 from baselines.common.cg import cg
@@ -24,24 +25,13 @@ def traj_segment_generator(pi, env, reward_giver, horizon, stochastic):
     # Initialize state variables
     t = 0
     ac = env.action_space.sample()
-    new = True
-    rew = 0.0
     true_rew = 0.0
     ob = env.reset()
 
-    cur_ep_ret = 0
-    cur_ep_len = 0
-    cur_ep_true_ret = 0
-    ep_true_rets = []
-    ep_rets = []
-    ep_lens = []
-
     # Initialize history arrays
     obs = np.array([ob for _ in range(horizon)])
-    true_rews = np.zeros(horizon, 'float32')
     rews = np.zeros(horizon, 'float32')
     vpreds = np.zeros(horizon, 'float32')
-    news = np.zeros(horizon, 'int32')
     acs = np.array([ac for _ in range(horizon)])
     prevacs = acs.copy()
 
@@ -52,58 +42,39 @@ def traj_segment_generator(pi, env, reward_giver, horizon, stochastic):
         # before returning segment [0, T-1] so we get the correct
         # terminal value
         if t > 0 and t % horizon == 0:
-            yield {"ob": obs, "rew": rews, "vpred": vpreds, "new": news,
-                   "ac": acs, "prevac": prevacs, "nextvpred": vpred * (1 - new),
-                   "ep_rets": ep_rets, "ep_lens": ep_lens, "ep_true_rets": ep_true_rets}
+            yield {"ob": obs, "rew": rews, "vpred": vpreds, 
+                   "ac": acs, "prevac": prevacs, "nextvpred": vpred}
             _, vpred = pi.act(stochastic, ob)
             # Be careful!!! if you change the downstream algorithm to aggregate
             # several of these batches, then be sure to do a deepcopy
-            ep_rets = []
-            ep_true_rets = []
-            ep_lens = []
         i = t % horizon
         obs[i] = ob
         vpreds[i] = vpred
-        news[i] = new
         acs[i] = ac
         prevacs[i] = prevac
 
         rew = reward_giver.get_reward(ob, ac)
-        ob, true_rew, new, _ = env.step(ac)
+        ob = env.step(ac)
         rews[i] = rew
-        true_rews[i] = true_rew
 
-        cur_ep_ret += rew
-        cur_ep_true_ret += true_rew
-        cur_ep_len += 1
-        if new:
-            ep_rets.append(cur_ep_ret)
-            ep_true_rets.append(cur_ep_true_ret)
-            ep_lens.append(cur_ep_len)
-            cur_ep_ret = 0
-            cur_ep_true_ret = 0
-            cur_ep_len = 0
-            ob = env.reset()
         t += 1
 
 
 def add_vtarg_and_adv(seg, gamma, lam):
-    new = np.append(seg["new"], 0)  # last element is only used for last vtarg, but we already zeroed it if last new = 1
     vpred = np.append(seg["vpred"], seg["nextvpred"])
     T = len(seg["rew"])
     seg["adv"] = gaelam = np.empty(T, 'float32')
     rew = seg["rew"]
     lastgaelam = 0
     for t in reversed(range(T)):
-        nonterminal = 1-new[t+1]
-        delta = rew[t] + gamma * vpred[t+1] * nonterminal - vpred[t]
-        gaelam[t] = lastgaelam = delta + gamma * lam * nonterminal * lastgaelam
+        delta = rew[t] + gamma * vpred[t+1] - vpred[t]
+        gaelam[t] = lastgaelam = delta + gamma * lam * lastgaelam
     seg["tdlamret"] = seg["adv"] + seg["vpred"]
 
 
 def learn(env, policy_func, reward_giver, expert_dataset, rank,
-          g_step, d_step, entcoeff, save_per_iter,
-          ckpt_dir, log_dir, timesteps_per_batch, task_name,
+          g_step, d_step, entcoeff, save_per_iter, timesteps_per_batch,
+          ckpt_dir, log_dir, task_name,
           gamma, lam,
           max_kl, cg_iters, cg_damping=1e-2,
           vf_stepsize=3e-4, d_stepsize=3e-4, vf_iters=3,
@@ -119,6 +90,9 @@ def learn(env, policy_func, reward_giver, expert_dataset, rank,
     ob_space = env.observation_space
     ac_space = env.action_space
     pi = policy_func("pi", ob_space, ac_space)
+    saver = tf.train.Saver(var_list=tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='pi'))
+    saver.restore(tf.get_default_session(), U_.getPath() + '/model/bc.ckpt')
+
     oldpi = policy_func("oldpi", ob_space, ac_space)
     atarg = tf.placeholder(dtype=tf.float32, shape=[None])  # Target advantage function (if applicable)
     ret = tf.placeholder(dtype=tf.float32, shape=[None])  # Empirical return
@@ -195,7 +169,7 @@ def learn(env, policy_func, reward_giver, expert_dataset, rank,
     d_adam.sync()
     vfadam.sync()
     if rank == 0:
-        print("Init param sum", th_init.sum(), flush=True)
+        print("Init param sum", th_init.sum())
 
     # Prepare for rollouts
     # ----------------------------------------
@@ -229,19 +203,24 @@ def learn(env, policy_func, reward_giver, expert_dataset, rank,
         if rank == 0 and iters_so_far % save_per_iter == 0 and ckpt_dir is not None:
             fname = os.path.join(ckpt_dir, task_name)
             print('save model as ', fname)
-            os.makedirs(os.path.dirname(fname), exist_ok=True)
+            try:
+                os.makedirs(os.path.dirname(fname))
+            except OSError:
+                # folder already exists
+                pass
             saver = tf.train.Saver()
             saver.save(tf.get_default_session(), fname)
 
-        logger.log("********** Iteration %i ************" % iters_so_far)
+        print("********** Iteration %i ************" % iters_so_far)
 
         def fisher_vector_product(p):
             return allmean(compute_fvp(p, *fvpargs)) + cg_damping * p
+            
         # ------------------ Update G ------------------
-        logger.log("Optimizing Policy...")
-        for _ in range(g_step):
+        print("Optimizing Policy...")
+        for _ in tqdm(range(g_step)):
             with timed("sampling"):
-                seg = seg_gen.__next__()
+                seg = seg_gen.next()
             add_vtarg_and_adv(seg, gamma, lam)
             # ob, ac, atarg, ret, td1ret = map(np.concatenate, (obs, acs, atargs, rets, td1rets))
             ob, ac, atarg, tdlamret = seg["ob"], seg["ac"], seg["adv"], seg["tdlamret"]
@@ -255,18 +234,20 @@ def learn(env, policy_func, reward_giver, expert_dataset, rank,
 
             assign_old_eq_new()  # set old parameter values to new parameter values
             with timed("computegrad"):
-                *lossbefore, g = compute_lossandgrad(*args)
+                tmp_result = compute_lossandgrad(seg["ob"], seg["ac"], atarg)
+                lossbefore = tmp_result[:-1]
+                g = tmp_result[-1]
             lossbefore = allmean(np.array(lossbefore))
             g = allmean(g)
             if np.allclose(g, 0):
-                logger.log("Got zero gradient. not updating")
+                print("Got zero gradient. not updating")
             else:
                 with timed("cg"):
                     stepdir = cg(fisher_vector_product, g, cg_iters=cg_iters, verbose=rank == 0)
                 assert np.isfinite(stepdir).all()
                 shs = .5*stepdir.dot(fisher_vector_product(stepdir))
                 lm = np.sqrt(shs / max_kl)
-                # logger.log("lagrange multiplier:", lm, "gnorm:", np.linalg.norm(g))
+                # print("lagrange multiplier:", lm, "gnorm:", np.linalg.norm(g))
                 fullstep = stepdir / lm
                 expectedimprove = g.dot(fullstep)
                 surrbefore = lossbefore[0]
@@ -275,21 +256,23 @@ def learn(env, policy_func, reward_giver, expert_dataset, rank,
                 for _ in range(10):
                     thnew = thbefore + fullstep * stepsize
                     set_from_flat(thnew)
-                    meanlosses = surr, kl, *_ = allmean(np.array(compute_losses(*args)))
+                    meanlosses = allmean(np.array(compute_losses(seg["ob"], seg["ac"], atarg)))
+                    surr = meanlosses[0]
+                    kl = meanlosses[1]
                     improve = surr - surrbefore
-                    logger.log("Expected: %.3f Actual: %.3f" % (expectedimprove, improve))
+                    print("Expected: %.3f Actual: %.3f" % (expectedimprove, improve))
                     if not np.isfinite(meanlosses).all():
-                        logger.log("Got non-finite value of losses -- bad!")
+                        print("Got non-finite value of losses -- bad!")
                     elif kl > max_kl * 1.5:
-                        logger.log("violated KL constraint. shrinking step.")
+                        print("violated KL constraint. shrinking step.")
                     elif improve < 0:
-                        logger.log("surrogate didn't improve. shrinking step.")
+                        print("surrogate didn't improve. shrinking step.")
                     else:
-                        logger.log("Stepsize OK!")
+                        print("Stepsize OK!")
                         break
                     stepsize *= .5
                 else:
-                    logger.log("couldn't compute a good step")
+                    print("couldn't compute a good step")
                     set_from_flat(thbefore)
                 if nworkers > 1 and iters_so_far % 20 == 0:
                     paramsums = MPI.COMM_WORLD.allgather((thnew.sum(), vfadam.getflat().sum()))  # list of tuples
@@ -303,48 +286,33 @@ def learn(env, policy_func, reward_giver, expert_dataset, rank,
                         g = allmean(compute_vflossandgrad(mbob, mbret))
                         vfadam.update(g, vf_stepsize)
 
-        g_losses = meanlosses
-        for (lossname, lossval) in zip(loss_names, meanlosses):
-            logger.record_tabular(lossname, lossval)
-        logger.record_tabular("ev_tdlam_before", explained_variance(vpredbefore, tdlamret))
+        print("ev_tdlam_before", explained_variance(vpredbefore, tdlamret))
+
         # ------------------ Update D ------------------
-        logger.log("Optimizing Discriminator...")
-        logger.log(fmt_row(13, reward_giver.loss_name))
+        print("Optimizing Discriminator...")
+        print(fmt_row(13, reward_giver.loss_name))
         ob_expert, ac_expert = expert_dataset.get_next_batch(len(ob))
         batch_size = len(ob) // d_step
         d_losses = []  # list of tuples, each of which gives the loss for a minibatch
-        for ob_batch, ac_batch in dataset.iterbatches((ob, ac),
+        for ob_batch, ac_batch in tqdm(dataset.iterbatches((ob, ac),
                                                       include_final_partial_batch=False,
-                                                      batch_size=batch_size):
+                                                      batch_size=batch_size)):
             ob_expert, ac_expert = expert_dataset.get_next_batch(len(ob_batch))
             # update running mean/std for reward_giver
             if hasattr(reward_giver, "obs_rms"): reward_giver.obs_rms.update(np.concatenate((ob_batch, ob_expert), 0))
-            *newlosses, g = reward_giver.lossandgrad(ob_batch, ac_batch, ob_expert, ac_expert)
+            tmp_result = reward_giver.lossandgrad(ob_batch, ac_batch, ob_expert, ac_expert)
+            newlosses = tmp_result[:-1]
+            g = tmp_result[-1]
             d_adam.update(allmean(g), d_stepsize)
             d_losses.append(newlosses)
-        logger.log(fmt_row(13, np.mean(d_losses, axis=0)))
+        print(fmt_row(13, np.mean(d_losses, axis=0)))
 
-        lrlocal = (seg["ep_lens"], seg["ep_rets"], seg["ep_true_rets"])  # local values
-        listoflrpairs = MPI.COMM_WORLD.allgather(lrlocal)  # list of tuples
-        lens, rews, true_rets = map(flatten_lists, zip(*listoflrpairs))
-        true_rewbuffer.extend(true_rets)
-        lenbuffer.extend(lens)
-        rewbuffer.extend(rews)
-
-        logger.record_tabular("EpLenMean", np.mean(lenbuffer))
-        logger.record_tabular("EpRewMean", np.mean(rewbuffer))
-        logger.record_tabular("EpTrueRewMean", np.mean(true_rewbuffer))
-        logger.record_tabular("EpThisIter", len(lens))
-        episodes_so_far += len(lens)
-        timesteps_so_far += sum(lens)
+        timesteps_so_far += len(seg['ob'])
         iters_so_far += 1
 
-        logger.record_tabular("EpisodesSoFar", episodes_so_far)
-        logger.record_tabular("TimestepsSoFar", timesteps_so_far)
-        logger.record_tabular("TimeElapsed", time.time() - tstart)
-
-        if rank == 0:
-            logger.dump_tabular()
+        print("EpisodesSoFar", episodes_so_far)
+        print("TimestepsSoFar", timesteps_so_far)
+        print("TimeElapsed", time.time() - tstart)
 
 
 def flatten_lists(listoflists):
