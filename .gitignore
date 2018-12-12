@@ -18,3 +18,4 @@ mocap/video-animation/
 # misc
 meeting/
 src/gail/scripts/model
+src/gail/scripts/checkpoint
